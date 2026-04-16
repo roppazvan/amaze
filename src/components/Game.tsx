@@ -27,6 +27,26 @@ export default function Game() {
     showLeaderboard,
   } = useGameState();
 
+  // Debug cheat: type `window.amazeCheat()` in console to skip to last level
+  useEffect(() => {
+    (window as unknown as Record<string, unknown>).amazeCheat = () => {
+      // Set attempts for all levels so it looks like a real run
+      for (let i = 1; i <= 20; i++) {
+        state.attempts[i] = 1;
+      }
+      selectLevel(20);
+      console.log("Cheat activated — selected level 20. Click 'Enter Maze', then just walk right to the exit.");
+    };
+    (window as unknown as Record<string, unknown>).amazeSkipLevel = () => {
+      levelComplete();
+      console.log("Level skipped.");
+    };
+    return () => {
+      delete (window as unknown as Record<string, unknown>).amazeCheat;
+      delete (window as unknown as Record<string, unknown>).amazeSkipLevel;
+    };
+  }, [state.attempts, selectLevel, levelComplete]);
+
   // Handle escape key for pause
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
