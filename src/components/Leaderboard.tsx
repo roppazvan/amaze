@@ -7,6 +7,14 @@ interface LeaderboardProps {
   onBack: () => void;
 }
 
+function formatTime(ms: number): string {
+  const totalSec = Math.floor(ms / 1000);
+  const min = Math.floor(totalSec / 60);
+  const sec = totalSec % 60;
+  if (min === 0) return `${sec}s`;
+  return `${min}m ${sec}s`;
+}
+
 export default function Leaderboard({ onBack }: LeaderboardProps) {
   const [entries, setEntries] = useState<LeaderboardEntry[]>([]);
   const [loading, setLoading] = useState(true);
@@ -29,15 +37,16 @@ export default function Leaderboard({ onBack }: LeaderboardProps) {
       <div className="text-center">
         <h2 className="text-3xl font-bold text-white">Leaderboard</h2>
         <p className="text-white/40 text-sm mt-1">
-          Complete all 20 levels with the fewest total attempts
+          Fewest attempts wins. Time breaks ties.
         </p>
       </div>
 
       <div className="w-full rounded-xl bg-white/5 border border-white/10 overflow-hidden">
-        <div className="grid grid-cols-[2.5rem_1fr_5rem] gap-2 px-4 py-2 text-xs text-white/40 uppercase tracking-wider border-b border-white/10">
+        <div className="grid grid-cols-[2rem_1fr_4rem_4.5rem] gap-2 px-4 py-2 text-xs text-white/40 uppercase tracking-wider border-b border-white/10">
           <span>#</span>
           <span>Player</span>
-          <span className="text-right">Attempts</span>
+          <span className="text-right">Tries</span>
+          <span className="text-right">Time</span>
         </div>
 
         {loading ? (
@@ -51,7 +60,7 @@ export default function Leaderboard({ onBack }: LeaderboardProps) {
             {entries.map((entry, i) => (
               <div
                 key={entry.id || i}
-                className={`grid grid-cols-[2.5rem_1fr_5rem] gap-2 px-4 py-3 text-sm ${
+                className={`grid grid-cols-[2rem_1fr_4rem_4.5rem] gap-2 px-4 py-3 text-sm ${
                   i % 2 === 0 ? "bg-white/[0.02]" : ""
                 }`}
               >
@@ -70,6 +79,9 @@ export default function Leaderboard({ onBack }: LeaderboardProps) {
                 </span>
                 <span className="text-white font-mono truncate">{entry.handle}</span>
                 <span className="text-right font-mono text-white/80">{entry.total_attempts}</span>
+                <span className="text-right font-mono text-white/50 text-xs">
+                  {formatTime(entry.total_time_ms)}
+                </span>
               </div>
             ))}
           </div>

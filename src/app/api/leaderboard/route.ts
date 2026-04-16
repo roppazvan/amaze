@@ -15,9 +15,9 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { handle, total_attempts } = body;
+    const { handle, total_attempts, total_time_ms } = body;
 
-    // Validate handle: must start with @, 2-30 chars, alphanumeric + underscores
+    // Validate handle
     if (typeof handle !== "string") {
       return NextResponse.json({ error: "handle is required" }, { status: 400 });
     }
@@ -28,7 +28,6 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "handle must be 1-29 characters (excluding @)" }, { status: 400 });
     }
 
-    // Only allow valid X handle characters: letters, numbers, underscores
     const handleBody = cleanHandle.slice(1);
     if (!/^[a-zA-Z0-9_]+$/.test(handleBody)) {
       return NextResponse.json({ error: "handle can only contain letters, numbers, and underscores" }, { status: 400 });
@@ -39,8 +38,13 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "total_attempts must be a positive integer" }, { status: 400 });
     }
 
+    // Validate total_time_ms
+    if (typeof total_time_ms !== "number" || total_time_ms < 1 || !Number.isInteger(Math.round(total_time_ms))) {
+      return NextResponse.json({ error: "total_time_ms must be a positive number" }, { status: 400 });
+    }
+
     await ensureTable();
-    const result = await submitScore(cleanHandle, total_attempts);
+    const result = await submitScore(cleanHandle, total_attempts, Math.round(total_time_ms));
 
     return NextResponse.json({ success: true, ...result });
   } catch (error) {

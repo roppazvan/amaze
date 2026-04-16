@@ -123,7 +123,7 @@ export default function Game() {
       )}
 
       {state.screen === GameScreen.ALL_COMPLETE && (
-        <AllComplete attempts={state.attempts} onMenu={goMenu} />
+        <AllComplete attempts={state.attempts} levelTimes={state.levelTimes} onMenu={goMenu} />
       )}
 
       {state.screen === GameScreen.LEADERBOARD && (

@@ -56,12 +56,15 @@ export interface GameState {
   attempts: Record<number, number>;
   maze: MazeGrid | null;
   viewport: number;
+  levelStartTime: number; // timestamp when current attempt started
+  levelTimes: Record<number, number>; // level -> cumulative ms spent across all attempts
 }
 
 export interface LeaderboardEntry {
   id?: number;
   handle: string;
   total_attempts: number;
+  total_time_ms: number;
   completed_at?: string;
 }
 

@@ -5,10 +5,11 @@ import { loadHandle, saveHandle } from "@/utils/localStorage";
 
 interface ScoreSubmitProps {
   totalAttempts: number;
+  totalTimeMs: number;
   onSubmitted: () => void;
 }
 
-export default function ScoreSubmit({ totalAttempts, onSubmitted }: ScoreSubmitProps) {
+export default function ScoreSubmit({ totalAttempts, totalTimeMs, onSubmitted }: ScoreSubmitProps) {
   const [handle, setHandle] = useState(loadHandle);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
@@ -38,6 +39,7 @@ export default function ScoreSubmit({ totalAttempts, onSubmitted }: ScoreSubmitP
         body: JSON.stringify({
           handle: `@${trimmed}`,
           total_attempts: totalAttempts,
+          total_time_ms: totalTimeMs,
         }),
       });
       if (!res.ok) {
@@ -59,10 +61,13 @@ export default function ScoreSubmit({ totalAttempts, onSubmitted }: ScoreSubmitP
         <input
           type="text"
           value={handle.startsWith("@") ? handle.slice(1) : handle}
-          onChange={(e) => setHandle(e.target.value.replace(/^@/, ""))}
+          onChange={(e) => {
+            setHandle(e.target.value.replace(/^@/, ""));
+            setError("");
+          }}
           placeholder="your_x_handle"
           maxLength={29}
-          className="w-full pl-9 pr-4 py-3 rounded-xl bg-white/10 border border-white/10 text-white placeholder-white/30 font-mono focus:outline-none focus:border-orange-500/50 transition-colors"
+          className="w-full pl-9 pr-4 py-3 rounded-xl bg-white/10 border border-white/10 text-white font-mono text-sm placeholder-white/30 focus:outline-none focus:border-orange-500/50 transition-colors"
         />
       </div>
       {error && <div className="text-red-400 text-xs text-center">{error}</div>}

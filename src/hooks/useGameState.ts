@@ -24,6 +24,8 @@ function createInitialState(): GameState {
     attempts: saved || {},
     maze: null,
     viewport: 7,
+    levelStartTime: 0,
+    levelTimes: {},
   };
 }
 
@@ -32,10 +34,19 @@ function buildMaze(level: number) {
   return generateMaze(config.gridSize, config.seed, config.extraPassages, config.maxBranches);
 }
 
+// Record time spent on the current attempt
+function recordAttemptTime(state: GameState): Record<number, number> {
+  if (state.levelStartTime === 0) return state.levelTimes;
+  const elapsed = Date.now() - state.levelStartTime;
+  const times = { ...state.levelTimes };
+  times[state.currentLevel] = (times[state.currentLevel] || 0) + elapsed;
+  return times;
+}
+
 function reducer(state: GameState, action: Action): GameState {
   switch (action.type) {
     case "START_GAME":
-      return { ...state, screen: GameScreen.LEVEL_INTRO, currentLevel: 1 };
+      return { ...state, screen: GameScreen.LEVEL_INTRO, currentLevel: 1, levelTimes: {} };
 
     case "SELECT_LEVEL":
       return { ...state, screen: GameScreen.LEVEL_INTRO, currentLevel: action.level };
@@ -47,17 +58,28 @@ function reducer(state: GameState, action: Action): GameState {
       if (!attempts[state.currentLevel]) attempts[state.currentLevel] = 0;
       attempts[state.currentLevel]++;
       saveProgress(attempts);
-      return { ...state, screen: GameScreen.PLAYING, maze, attempts, viewport: config.viewport };
+      return {
+        ...state,
+        screen: GameScreen.PLAYING,
+        maze,
+        attempts,
+        viewport: config.viewport,
+        levelStartTime: Date.now(),
+      };
     }
 
-    case "LEVEL_COMPLETE":
+    case "LEVEL_COMPLETE": {
+      const levelTimes = recordAttemptTime(state);
       if (state.currentLevel >= TOTAL_LEVELS) {
-        return { ...state, screen: GameScreen.ALL_COMPLETE };
+        return { ...state, screen: GameScreen.ALL_COMPLETE, levelTimes, levelStartTime: 0 };
       }
-      return { ...state, screen: GameScreen.LEVEL_COMPLETE };
+      return { ...state, screen: GameScreen.LEVEL_COMPLETE, levelTimes, levelStartTime: 0 };
+    }
 
-    case "GAME_OVER":
-      return { ...state, screen: GameScreen.GAME_OVER };
+    case "GAME_OVER": {
+      const levelTimes = recordAttemptTime(state);
+      return { ...state, screen: GameScreen.GAME_OVER, levelTimes, levelStartTime: 0 };
+    }
 
     case "RETRY": {
       const config = getLevelConfig(state.currentLevel);
@@ -65,7 +87,14 @@ function reducer(state: GameState, action: Action): GameState {
       const attempts = { ...state.attempts };
       attempts[state.currentLevel]++;
       saveProgress(attempts);
-      return { ...state, screen: GameScreen.PLAYING, maze, attempts, viewport: config.viewport };
+      return {
+        ...state,
+        screen: GameScreen.PLAYING,
+        maze,
+        attempts,
+        viewport: config.viewport,
+        levelStartTime: Date.now(),
+      };
     }
 
     case "NEXT_LEVEL": {
@@ -77,7 +106,7 @@ function reducer(state: GameState, action: Action): GameState {
     }
 
     case "GO_MENU":
-      return { ...state, screen: GameScreen.MENU, maze: null };
+      return { ...state, screen: GameScreen.MENU, maze: null, levelStartTime: 0 };
 
     case "TOGGLE_PAUSE":
       if (state.screen === GameScreen.PLAYING) return { ...state, screen: GameScreen.PAUSED };
