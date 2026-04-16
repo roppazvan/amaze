@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { GameScreen, Direction } from "@/game/types";
 import { useGameState } from "@/hooks/useGameState";
 import GameCanvas from "./GameCanvas";
@@ -73,6 +73,11 @@ export default function Game() {
           {(state.screen === GameScreen.PLAYING || state.screen === GameScreen.PAUSED) && (
             <div className="absolute top-4 left-4 right-4 flex justify-between text-white/60 text-sm font-mono pointer-events-none">
               <span>Level {state.currentLevel}</span>
+              <LiveTimer
+                levelStartTime={state.levelStartTime}
+                previousTime={state.levelTimes[state.currentLevel] || 0}
+                paused={state.screen === GameScreen.PAUSED}
+              />
               <span>Attempt #{state.attempts[state.currentLevel] || 1}</span>
             </div>
           )}
@@ -134,6 +139,36 @@ export default function Game() {
         <PauseMenu onResume={togglePause} onQuit={goMenu} />
       )}
     </div>
+  );
+}
+
+function LiveTimer({
+  levelStartTime,
+  previousTime,
+  paused,
+}: {
+  levelStartTime: number;
+  previousTime: number;
+  paused: boolean;
+}) {
+  const [now, setNow] = useState(Date.now());
+
+  useEffect(() => {
+    if (paused || levelStartTime === 0) return;
+    const id = setInterval(() => setNow(Date.now()), 200);
+    return () => clearInterval(id);
+  }, [paused, levelStartTime]);
+
+  const currentAttemptMs = levelStartTime > 0 && !paused ? now - levelStartTime : 0;
+  const totalMs = previousTime + currentAttemptMs;
+  const totalSec = Math.floor(totalMs / 1000);
+  const min = Math.floor(totalSec / 60);
+  const sec = totalSec % 60;
+
+  return (
+    <span className="tabular-nums">
+      {String(min).padStart(2, "0")}:{String(sec).padStart(2, "0")}
+    </span>
   );
 }
 
