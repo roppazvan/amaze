@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { GameScreen, Direction } from "@/game/types";
 import { useGameState } from "@/hooks/useGameState";
 import GameCanvas from "./GameCanvas";
@@ -27,25 +27,24 @@ export default function Game() {
     showLeaderboard,
   } = useGameState();
 
-  // Debug cheat: type `window.amazeCheat()` in console to skip to last level
+  // Debug cheats — store latest callbacks in refs so window functions always work
+  const cheatsRef = useRef({ selectLevel, levelComplete, startLevel, state });
+  cheatsRef.current = { selectLevel, levelComplete, startLevel, state };
+
   useEffect(() => {
-    (window as unknown as Record<string, unknown>).amazeCheat = () => {
-      // Set attempts for all levels so it looks like a real run
-      for (let i = 1; i <= 20; i++) {
-        state.attempts[i] = 1;
-      }
-      selectLevel(20);
-      console.log("Cheat activated — selected level 20. Click 'Enter Maze', then just walk right to the exit.");
+    /* eslint-disable @typescript-eslint/no-explicit-any */
+    (window as any).amazeCheat = () => {
+      const { selectLevel: sl, state: s } = cheatsRef.current;
+      for (let i = 1; i <= 20; i++) s.attempts[i] = 1;
+      sl(20);
+      console.log("Cheat activated — level 20 selected. Click 'Enter Maze', walk right to exit.");
     };
-    (window as unknown as Record<string, unknown>).amazeSkipLevel = () => {
-      levelComplete();
+    (window as any).amazeSkipLevel = () => {
+      cheatsRef.current.levelComplete();
       console.log("Level skipped.");
     };
-    return () => {
-      delete (window as unknown as Record<string, unknown>).amazeCheat;
-      delete (window as unknown as Record<string, unknown>).amazeSkipLevel;
-    };
-  }, [state.attempts, selectLevel, levelComplete]);
+    /* eslint-enable @typescript-eslint/no-explicit-any */
+  }, []);
 
   // Handle escape key for pause
   useEffect(() => {
