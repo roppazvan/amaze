@@ -48,7 +48,7 @@ export default function Menu({ onStart, onSelectLevel, onLeaderboard, attempts }
   };
 
   return (
-    <div className="flex flex-col items-center gap-8 animate-fadeIn">
+    <div className="flex flex-col items-center gap-6 sm:gap-8 animate-fadeIn py-8 px-4 w-full max-w-sm mx-auto">
       {/* Logo */}
       <div className="text-center">
         <h1 className="text-6xl font-bold tracking-tighter text-white">

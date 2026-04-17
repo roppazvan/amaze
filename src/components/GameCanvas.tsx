@@ -145,8 +145,8 @@ export default function GameCanvas({ maze, screen, viewport, onExit, onTrapped }
   return (
     <canvas
       ref={canvasRef}
-      style={{ width: size, height: size }}
-      className="rounded-2xl shadow-2xl shadow-black/50 max-w-full touch-none"
+      style={{ width: size, height: size, maxWidth: "min(90vw, 90vh - 10rem)" }}
+      className="rounded-2xl shadow-2xl shadow-black/50 touch-none aspect-square h-auto"
     />
   );
 }

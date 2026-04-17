@@ -75,22 +75,13 @@ export default function Game() {
       state.screen === GameScreen.PAUSED);
 
   return (
-    <div className="relative flex flex-col items-center justify-center min-h-screen bg-[#0d0d1a] select-none overflow-hidden">
-      {/* Game canvas */}
+    <div className="relative flex flex-col items-center justify-center min-h-[100dvh] bg-[#0d0d1a] select-none">
+      {/* Game canvas + controls */}
       {showCanvas && state.maze && (
-        <div className="relative">
-          <GameCanvas
-            key={`${state.currentLevel}-${state.attempts[state.currentLevel]}`}
-            maze={state.maze}
-            screen={state.screen}
-            viewport={state.viewport}
-            onExit={handleExit}
-            onTrapped={handleTrapped}
-          />
-
-          {/* HUD */}
+        <div className="flex flex-col items-center gap-4 w-full px-4">
+          {/* HUD above canvas */}
           {(state.screen === GameScreen.PLAYING || state.screen === GameScreen.PAUSED) && (
-            <div className="absolute top-4 left-4 right-4 flex justify-between text-white/60 text-sm font-mono pointer-events-none">
+            <div className="w-full max-w-[576px] flex justify-between text-white/60 text-sm font-mono px-1">
               <span>Level {state.currentLevel}</span>
               <LiveTimer
                 levelStartTime={state.levelStartTime}
@@ -101,9 +92,20 @@ export default function Game() {
             </div>
           )}
 
-          {/* Mobile D-pad */}
+          <div className="relative w-full flex justify-center">
+            <GameCanvas
+              key={`${state.currentLevel}-${state.attempts[state.currentLevel]}`}
+              maze={state.maze}
+              screen={state.screen}
+              viewport={state.viewport}
+              onExit={handleExit}
+              onTrapped={handleTrapped}
+            />
+          </div>
+
+          {/* Mobile D-pad — in normal flow, always visible */}
           {state.screen === GameScreen.PLAYING && (
-            <div className="absolute -bottom-36 left-1/2 -translate-x-1/2 md:hidden">
+            <div className="md:hidden pb-4">
               <DPad />
             </div>
           )}
