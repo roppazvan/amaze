@@ -78,10 +78,10 @@ export default function Game() {
     <div className="relative flex flex-col items-center justify-center min-h-[100dvh] bg-[#0d0d1a] select-none">
       {/* Game canvas + controls */}
       {showCanvas && state.maze && (
-        <div className="flex flex-col items-center gap-4 w-full px-4">
+        <div className="flex flex-col items-center gap-3 w-full px-4 py-2 max-h-[100dvh]">
           {/* HUD above canvas */}
           {(state.screen === GameScreen.PLAYING || state.screen === GameScreen.PAUSED) && (
-            <div className="w-full max-w-[576px] flex justify-between text-white/60 text-sm font-mono px-1">
+            <div className="w-full max-w-[576px] flex justify-between text-white/60 text-sm font-mono px-1 shrink-0">
               <span>Level {state.currentLevel}</span>
               <LiveTimer
                 levelStartTime={state.levelStartTime}
@@ -92,7 +92,8 @@ export default function Game() {
             </div>
           )}
 
-          <div className="relative w-full flex justify-center">
+          {/* Canvas wrapper — shrinks to fit, leaving room for D-pad */}
+          <div className="flex justify-center items-center min-h-0 flex-1 w-full max-w-[576px]">
             <GameCanvas
               key={`${state.currentLevel}-${state.attempts[state.currentLevel]}`}
               maze={state.maze}
@@ -103,9 +104,9 @@ export default function Game() {
             />
           </div>
 
-          {/* Mobile D-pad — in normal flow, always visible */}
+          {/* Mobile D-pad */}
           {state.screen === GameScreen.PLAYING && (
-            <div className="md:hidden pb-4">
+            <div className="md:hidden shrink-0 pb-2">
               <DPad />
             </div>
           )}
